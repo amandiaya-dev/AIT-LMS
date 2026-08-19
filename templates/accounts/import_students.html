@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Import Students - AIT LMS{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-upload me-2 text-primary"></i>Upload Student Registry
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted small mb-3">
+                    Upload a CSV file exported from your school's student management system.
+                    Only students in this registry can create accounts on the LMS.
+                </p>
+
+                <div class="alert alert-info small">
+                    <strong>Required CSV columns:</strong><br>
+                    <code>student_id, first_name, last_name, department, semester, status</code><br><br>
+                    <strong>Example row:</strong><br>
+                    <code>AIT/2024/001, Zaza, Amadu, Computer Science, 2, active</code><br><br>
+                    Set <code>status</code> to <strong>active</strong> or <strong>inactive</strong>.
+                    Inactive students cannot sign up.
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">CSV File</label>
+                        {{ form.csv_file }}{{ form.csv_file.errors }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-upload me-2"></i>Import Students
+                    </button>
+                </form>
+
+                {% if results %}
+                <hr>
+                <h6 class="fw-bold">Import Results</h6>
+                <ul class="list-unstyled small">
+                    <li><span class="badge bg-success me-1">{{ results.created }}</span> New records added</li>
+                    <li><span class="badge bg-primary me-1">{{ results.updated }}</span> Existing records updated</li>
+                    <li><span class="badge bg-warning text-dark me-1">{{ results.skipped }}</span> Rows skipped</li>
+                </ul>
+                {% if results.errors %}
+                <div class="alert alert-warning small mt-2">
+                    <strong>Errors:</strong>
+                    <ul class="mb-0 ps-3">
+                        {% for error in results.errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Download sample CSV -->
+        <div class="card mt-3">
+            <div class="card-body p-3 text-center">
+                <p class="small text-muted mb-2">Need a template? Download a sample CSV:</p>
+                <a href="{% url 'sample_csv' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-download me-1"></i>Download Sample CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-people me-2 text-primary"></i>Current Registry</span>
+                <span class="badge bg-secondary">{{ records.count }} students</span>
+            </div>
+            {% if records %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Semester</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in records %}
+                        <tr>
+                            <td><code>{{ r.student_id }}</code></td>
+                            <td>{{ r.first_name }} {{ r.last_name }}</td>
+                            <td>{% if r.semester %}Sem {{ r.semester }}{% else %}—{% endif %}</td>
+                            <td>{{ r.department|default:"—" }}</td>
+                            <td>
+                                {% if r.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted py-4">
+                <i class="bi bi-people fs-1 d-block mb-3 opacity-25"></i>
+                <p>No students imported yet. Upload a CSV to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

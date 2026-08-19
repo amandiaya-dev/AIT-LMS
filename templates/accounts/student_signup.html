@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Student Sign Up - AIT LMS{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-badge me-2 text-primary"></i>Student Registration
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info small mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Enter your <strong>Student ID</strong> exactly as it appears on your student card or letter of admission.
+                    Your name, semester, and department will be filled in automatically from the AIT registry.
+                    Your default password will be <strong>AIT@2026</strong>.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger small">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}<br>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Student ID Number</label>
+                        {{ form.student_id }}
+                        <small class="text-muted">e.g. AIT/2024/001</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-person-check me-2"></i>Verify & Create Account
+                    </button>
+                </form>
+
+                <p class="text-center mt-3 text-muted small">
+                    Already registered? <a href="{% url 'login' %}">Log in here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

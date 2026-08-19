@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance - {{ session.title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7">
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h3 class="mb-1">Mark Attendance</h3>
+    <p class="text-muted mb-4">
+      <strong>{{ session.title }}</strong> — {{ session.course.title }} — {{ session.date|date:"M d, Y" }}
+    </p>
+
+    {% if records %}
+      <form method="post">{% csrf_token %}
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr><th>Student</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for record in records %}
+            <tr>
+              <td>{{ record.student.get_full_name|default:record.student.username }}</td>
+              <td>
+                <div class="d-flex gap-3">
+                  {% for value, label in record.STATUS_CHOICES %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                      name="status_{{ record.pk }}"
+                      id="status_{{ record.pk }}_{{ value }}"
+                      value="{{ value }}"
+                      {% if record.status == value %}checked{% endif %}>
+                    <label class="form-check-label" for="status_{{ record.pk }}_{{ value }}">{{ label }}</label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Save Attendance</button>
+      </form>
+    {% else %}
+      <div class="alert alert-info">No students are enrolled in this course yet.</div>
+    {% endif %}
+  </div></div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8">
+  <div class="card shadow-sm mb-4"><div class="card-body p-4">
+    <h3>{{ assignment.title }}</h3>
+    <p class="text-muted">{{ assignment.course.title }} &nbsp;|&nbsp; Due: <strong>{{ assignment.due_date|date:"M d, Y H:i" }}</strong></p>
+    <hr><h5>Instructions</h5><p>{{ assignment.description }}</p>
+  </div></div>
+  {% if user.is_student %}
+    {% if existing_submission %}
+      <div class="card shadow-sm border-success"><div class="card-header bg-success text-white">✓ Submitted</div><div class="card-body">
+        {% if existing_submission.text %}<p><strong>Your answer:</strong><br>{{ existing_submission.text }}</p>{% endif %}
+        {% if existing_submission.file %}<p><strong>File:</strong> <a href="{{ existing_submission.file.url }}">Download</a></p>{% endif %}
+        <p class="text-muted small">Submitted: {{ existing_submission.submitted_at|date:"M d, Y H:i" }}</p>
+        <hr>
+        {% if existing_submission.grade_display %}
+          <p><strong>Score:</strong> <span class="badge bg-primary fs-6">{{ existing_submission.grade_display }}</span></p>
+          {% if existing_submission.feedback %}<p><strong>Feedback:</strong> {{ existing_submission.feedback }}</p>{% endif %}
+        {% else %}<p class="text-muted">Not graded yet.</p>{% endif %}
+      </div></div>
+    {% else %}
+      <div class="card shadow-sm"><div class="card-header"><strong>Submit Your Work</strong></div><div class="card-body">
+        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+          <div class="mb-3"><label class="form-label">Your Answer</label>{{ form.text }}</div>
+          <div class="mb-3"><label class="form-label">Upload File (optional)</label>{{ form.file }}</div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div></div>
+    {% endif %}
+  {% endif %}
+  <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary mt-3">← Back</a>
+</div></div>
+{% endblock %}

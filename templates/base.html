@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AIT LMS{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --blue:#0056D2; --dark:#1F1F3A; }
+        body { background:#F8F9FA; font-family:'Segoe UI',sans-serif; color:#1F1F3A; }
+        .navbar { background:var(--dark) !important; box-shadow:0 2px 12px rgba(0,0,0,0.3); padding:0.8rem 0; }
+        .navbar-brand { font-size:1.4rem; font-weight:800; color:#fff !important; }
+        .navbar-brand span { color:#F9C94E; }
+        .nav-link { color:rgba(255,255,255,0.85) !important; font-size:0.9rem; padding:0.4rem 0.9rem !important; border-radius:6px; transition:all 0.2s; }
+        .nav-link:hover { background:rgba(255,255,255,0.12); color:#fff !important; }
+        .card { border:none; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.07); transition:transform 0.2s,box-shadow 0.2s; }
+        .card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,0.12); }
+        .card-header { background:#fff; border-bottom:1px solid #f0f0f0; border-radius:12px 12px 0 0 !important; font-weight:600; padding:1rem 1.25rem; }
+        .btn-primary { background:var(--blue); border-color:var(--blue); border-radius:8px; font-weight:600; }
+        .btn-primary:hover { background:#004bb5; border-color:#004bb5; }
+        .btn { border-radius:8px; font-weight:500; }
+        .badge { border-radius:6px; font-weight:500; }
+        .hero { background:linear-gradient(135deg,#1F1F3A 0%,#0056D2 100%); color:white; padding:2.5rem; margin-bottom:2rem; border-radius:16px; }
+        .hero h2 { font-weight:800; font-size:1.8rem; }
+        .stat-card { background:#fff; border-radius:12px; padding:1.5rem; text-align:center; box-shadow:0 2px 16px rgba(0,0,0,0.07); }
+        .stat-number { font-size:2.5rem; font-weight:800; line-height:1; }
+        .stat-label { color:#6c757d; font-size:0.85rem; margin-top:0.4rem; }
+        .semester-badge { background:#E8F1FF; color:#0056D2; font-weight:600; border-radius:20px; padding:0.3rem 0.9rem; font-size:0.8rem; }
+        .list-group-item { border-color:#f0f0f0; padding:0.9rem 1.25rem; }
+        .sidebar-card { background:#fff; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.07); overflow:hidden; }
+        footer { background:var(--dark); color:rgba(255,255,255,0.5); padding:1.5rem 0; margin-top:4rem; font-size:0.85rem; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">AIT <span>LMS</span></a>
+        {% if user.is_authenticated %}
+        <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <i class="bi bi-list text-white fs-4"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <div class="navbar-nav me-auto gap-1">
+                <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-house me-1"></i>Home</a>
+                <a class="nav-link" href="{% url 'course_list' %}"><i class="bi bi-book me-1"></i>Courses</a>
+                {% if user.is_student %}
+                <a class="nav-link" href="{% url 'assignment_list' %}"><i class="bi bi-pencil-square me-1"></i>Assignments</a>
+                <a class="nav-link" href="{% url 'quiz_list' %}"><i class="bi bi-patch-question me-1"></i>Quizzes</a>
+                <a class="nav-link" href="{% url 'my_attendance' %}"><i class="bi bi-calendar-check me-1"></i>Attendance</a>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                {% if user.is_student and user.semester %}
+                <span class="semester-badge"><i class="bi bi-mortarboard me-1"></i>{{ user.get_semester_display_name }}</span>
+                {% endif %}
+                {% if user.is_staff or user.is_admin_role %}
+                <a href="{% url 'import_students' %}" class="btn btn-sm btn-warning fw-bold">
+                    <i class="bi bi-upload me-1"></i>Import Students
+                </a>
+                {% endif %}
+                <span class="text-white-50 small d-none d-lg-inline">{{ user.get_full_name|default:user.username }}</span>
+                <a href="{% url 'change_password' %}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-key me-1"></i>Password
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-box-arrow-right me-1"></i>Log out
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+            <i class="bi bi-info-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    <div class="container text-center">
+        <p class="mb-0">AIT Learning Management System &copy; 2026 &mdash; African Institute of Technology</p>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

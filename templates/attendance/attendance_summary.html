@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Attendance - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">Attendance</h3>
+    <p class="text-muted mb-0">{{ course.title }}</p>
+  </div>
+  {% if is_instructor %}
+    <a href="{% url 'take_attendance' course.pk %}" class="btn btn-primary">+ Take Attendance</a>
+  {% endif %}
+</div>
+
+{% if is_instructor %}
+  {% if summary %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><strong>Student Attendance Summary</strong> — {{ sessions.count }} session{{ sessions.count|pluralize }} total</div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Student</th>
+              <th>Present</th>
+              <th>Total Sessions</th>
+              <th>Attendance %</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in summary %}
+            <tr>
+              <td>{{ row.student.get_full_name|default:row.student.username }}</td>
+              <td>{{ row.present }}</td>
+              <td>{{ row.total }}</td>
+              <td>{{ row.percentage }}%</td>
+              <td>
+                {% if row.percentage >= 75 %}
+                  <span class="badge bg-success">Good</span>
+                {% elif row.percentage >= 50 %}
+                  <span class="badge bg-warning text-dark">At Risk</span>
+                {% else %}
+                  <span class="badge bg-danger">Poor</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Sessions</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for session in sessions %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ session.date|date:"M d, Y" }} {% if session.topic %}<small class="text-muted">— {{ session.topic }}</small>{% endif %}</span>
+          <span class="badge bg-secondary">{{ session.records.count }} recorded</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center text-muted py-5">
+        <p>No attendance sessions recorded yet.</p>
+        <a href="{% url 'take_attendance' course.pk %}" class="btn btn-primary">Take First Attendance</a>
+      </div>
+    </div>
+  {% endif %}
+
+{% else %}
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h1 class="display-5 text-primary">{{ present }}</h1>
+          <p class="text-muted mb-0">Sessions Attended</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h1 class="display-5 text-secondary">{{ total }}</h1>
+          <p class="text-muted mb-0">Total Sessions</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h1 class="display-5 {% if percentage >= 75 %}text-success{% elif percentage >= 50 %}text-warning{% else %}text-danger{% endif %}">{{ percentage }}%</h1>
+          <p class="text-muted mb-0">Attendance Rate</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header"><strong>My Attendance Record</strong></div>
+    {% if records %}
+      <ul class="list-group list-group-flush">
+        {% for record in records %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ record.session.date|date:"M d, Y" }} {% if record.session.topic %}<small class="text-muted">— {{ record.session.topic }}</small>{% endif %}</span>
+          {% if record.status == "present" %}
+            <span class="badge bg-success">Present</span>
+          {% else %}
+            <span class="badge bg-danger">Absent</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="card-body text-muted text-center py-4">No attendance records yet.</div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary mt-3">← Back to Course</a>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}My Attendance{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Attendance</h2>
+
+{% if attendance_data %}
+  {% for data in attendance_data %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>{{ data.course.title }}</strong>
+      <span class="badge {% if data.percentage >= 75 %}bg-success{% elif data.percentage >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
+        {{ data.percentage }}% attendance
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="row text-center mb-3">
+        <div class="col"><span class="display-6 text-success">{{ data.present }}</span><p class="text-muted small">Present</p></div>
+        <div class="col"><span class="display-6 text-warning">{{ data.late }}</span><p class="text-muted small">Late</p></div>
+        <div class="col"><span class="display-6 text-danger">{{ data.absent }}</span><p class="text-muted small">Absent</p></div>
+        <div class="col"><span class="display-6 text-secondary">{{ data.total }}</span><p class="text-muted small">Total Sessions</p></div>
+      </div>
+      {% if data.records %}
+        <table class="table table-sm table-bordered">
+          <thead class="table-light"><tr><th>Session</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for record in data.records %}
+            <tr>
+              <td>{{ record.session.title }}</td>
+              <td>{{ record.session.date|date:"M d, Y" }}</td>
+              <td>
+                {% if record.status == "present" %}<span class="badge bg-success">Present</span>
+                {% elif record.status == "late" %}<span class="badge bg-warning text-dark">Late</span>
+                {% else %}<span class="badge bg-danger">Absent</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="card shadow-sm"><div class="card-body text-center text-muted py-5">
+    <p>No attendance records yet. Enroll in courses to see your attendance here.</p>
+  </div></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}Submissions{% endblock %}
+{% block content %}
+<h3 class="mb-1">Submissions</h3>
+<p class="text-muted mb-4"><strong>{{ assignment.title }}</strong> — {{ assignment.course.title }}</p>
+{% if submissions %}
+  <div class="list-group">
+    {% for s in submissions %}
+    <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+      <div>
+        <strong>{{ s.student.get_full_name|default:s.student.username }}</strong><br>
+        <small class="text-muted">{{ s.submitted_at|date:"M d, Y H:i" }}</small>
+        {% if s.grade_display %}<span class="badge bg-success ms-2">{{ s.grade_display }}</span>{% else %}<span class="badge bg-warning text-dark ms-2">Not graded</span>{% endif %}
+      </div>
+      <a href="{% url 'grade_submission' s.pk %}" class="btn btn-sm btn-outline-primary">{% if s.grade_display %}Edit Grade{% else %}Grade{% endif %}</a>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card shadow-sm"><div class="card-body text-center text-muted py-5"><p>No submissions yet.</p></div></div>
+{% endif %}
+<a href="{% url 'course_detail' assignment.course.pk %}" class="btn btn-outline-secondary mt-3">← Back to Course</a>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Course - AIT LMS{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-book me-2 text-primary"></i>{{ action }} Course</div>
+      <div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          <div class="mb-3"><label class="form-label fw-semibold small">Course Title</label>{{ form.title }}{{ form.title.errors }}</div>
+          <div class="mb-3"><label class="form-label fw-semibold small">Description</label>{{ form.description }}{{ form.description.errors }}</div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Semester</label>
+            {{ form.semester }}{{ form.semester.errors }}
+            <small class="text-muted">Students in this semester will automatically see this course as recommended</small>
+          </div>
+          <button type="submit" class="btn btn-primary">{{ action }} Course</button>
+          <a href="{% url 'course_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Take Attendance - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="mb-1">Take Attendance</h3>
+        <p class="text-muted mb-4">Course: <strong>{{ course.title }}</strong></p>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Session Date</label>
+              {{ form.date }}{{ form.date.errors }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Topic Covered (optional)</label>
+              {{ form.topic }}
+            </div>
+          </div>
+
+          <h5 class="mb-3">Students ({{ enrolled_students.count }})</h5>
+
+          {% if enrolled_students %}
+            <div class="mb-3">
+              <button type="button" class="btn btn-sm btn-outline-success me-2" onclick="markAll(true)">Mark All Present</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll(false)">Mark All Absent</button>
+            </div>
+
+            <div class="list-group mb-4">
+              {% for enrollment in enrolled_students %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ enrollment.student.get_full_name|default:enrollment.student.username }}</span>
+                <div class="form-check form-switch">
+                  <input class="form-check-input student-check" type="checkbox"
+                    name="student_{{ enrollment.student.pk }}"
+                    id="student_{{ enrollment.student.pk }}" checked>
+                  <label class="form-check-label" for="student_{{ enrollment.student.pk }}">Present</label>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Attendance</button>
+            <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+          {% else %}
+            <p class="text-muted">No students enrolled in this course yet.</p>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function markAll(present) {
+  document.querySelectorAll('.student-check').forEach(cb => cb.checked = present);
+}
+</script>
+{% endblock %}

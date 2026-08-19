@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - AIT LMS{% endblock %}
+{% block content %}
+
+{% if user.is_student %}
+<!-- Hero -->
+<div class="hero rounded-4 mb-4 px-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p class="mb-1 opacity-75 small"><i class="bi bi-mortarboard me-1"></i>{{ user.get_semester_display_name }} &nbsp;|&nbsp; {{ user.department|default:"AIT" }}</p>
+            <h2 class="fw-bold mb-1">Welcome back, {{ user.first_name|default:user.username }}!</h2>
+            <p class="opacity-75 mb-0">Student ID: <strong>{{ user.student_id|default:user.username }}</strong></p>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'course_list' %}" class="btn btn-warning fw-bold px-4">
+                <i class="bi bi-search me-2"></i>Browse Courses
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-primary">{{ enrollments.count }}</div>
+            <div class="stat-label"><i class="bi bi-book me-1"></i>Enrolled</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-success">{{ submitted_count }}</div>
+            <div class="stat-label"><i class="bi bi-pencil-square me-1"></i>Submitted</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-warning">{{ quiz_attempts }}</div>
+            <div class="stat-label"><i class="bi bi-patch-question me-1"></i>Quizzes</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-info">{{ user.get_semester_display_name|slice:"-1" }}</div>
+            <div class="stat-label"><i class="bi bi-mortarboard me-1"></i>Semester</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- My Courses -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-play-circle me-2 text-primary"></i>My Courses</span>
+                <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            {% if enrollments %}
+            <div class="list-group list-group-flush">
+                {% for e in enrollments %}
+                <a href="{% url 'course_detail' e.course.pk %}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                         style="width:48px;height:48px;background:linear-gradient(135deg,#0056D2,#00C9FF);">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">{{ e.course.title }}</div>
+                        <small class="text-muted">
+                            {{ e.course.instructor.get_full_name|default:e.course.instructor.username }}
+                            {% if e.course.semester %}&nbsp;|&nbsp;Semester {{ e.course.semester }}{% endif %}
+                        </small>
+                    </div>
+                    <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-book fs-1 d-block mb-3 text-primary opacity-25"></i>
+                <p class="mb-2">No courses enrolled yet.</p>
+                <a href="{% url 'course_list' %}" class="btn btn-primary btn-sm">Browse Courses</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recommended Courses -->
+        {% if recommended %}
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-stars me-2 text-warning"></i>Recommended for {{ user.get_semester_display_name }}
+            </div>
+            <div class="list-group list-group-flush">
+                {% for course in recommended %}
+                <div class="list-group-item d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                         style="width:48px;height:48px;background:linear-gradient(135deg,#F9C94E,#FF6B35);">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">{{ course.title }}</div>
+                        <small class="text-muted">{{ course.instructor.get_full_name|default:course.instructor.username }}</small>
+                    </div>
+                    <a href="{% url 'enroll' course.pk %}" class="btn btn-sm btn-success">
+                        <i class="bi bi-plus me-1"></i>Enroll
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="sidebar-card mb-3">
+            <div class="p-3 border-bottom fw-semibold small"><i class="bi bi-lightning me-2 text-warning"></i>Quick Access</div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'assignment_list' %}" class="list-group-item list-group-item-action small">
+                    <i class="bi bi-pencil-square me-2 text-primary"></i>Assignments
+                </a>
+                <a href="{% url 'quiz_list' %}" class="list-group-item list-group-item-action small">
+                    <i class="bi bi-patch-question me-2 text-warning"></i>Quizzes
+                </a>
+                <a href="{% url 'my_attendance' %}" class="list-group-item list-group-item-action small">
+                    <i class="bi bi-calendar-check me-2 text-success"></i>Attendance
+                </a>
+                <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action small">
+                    <i class="bi bi-key me-2 text-danger"></i>Change Password
+                </a>
+            </div>
+        </div>
+        <div class="sidebar-card">
+            <div class="p-3 border-bottom fw-semibold small"><i class="bi bi-person-circle me-2"></i>My Profile</div>
+            <div class="p-3">
+                <p class="small mb-1"><strong>ID:</strong> {{ user.student_id|default:user.username }}</p>
+                <p class="small mb-1"><strong>Semester:</strong> {{ user.get_semester_display_name }}</p>
+                <p class="small mb-0"><strong>Department:</strong> {{ user.department|default:"Not set" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif user.is_instructor %}
+<div class="hero rounded-4 mb-4 px-4">
+    <h2 class="fw-bold mb-1"><i class="bi bi-person-workspace me-2"></i>Instructor Dashboard</h2>
+    <p class="opacity-75 mb-0">Welcome back, {{ user.get_full_name|default:user.username }}</p>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="stat-card"><div class="stat-number text-primary">{{ courses.count }}</div><div class="stat-label">Courses Created</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><div class="stat-number text-success">{{ total_students }}</div><div class="stat-label">Total Students</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><div class="stat-number text-warning">{{ total_assignments }}</div><div class="stat-label">Assignments Posted</div></div></div>
+</div>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-book me-2 text-primary"></i>My Courses</span>
+                <a href="{% url 'course_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>New Course</a>
+            </div>
+            {% if courses %}
+            <div class="list-group list-group-flush">
+                {% for course in courses %}
+                <div class="list-group-item d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                         style="width:48px;height:48px;background:linear-gradient(135deg,#0056D2,#00C9FF);">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">{{ course.title }}</div>
+                        <small class="text-muted">
+                            {{ course.student_count }} students
+                            {% if course.semester %}&nbsp;|&nbsp;Semester {{ course.semester }}{% endif %}
+                        </small>
+                    </div>
+                    <a href="{% url 'course_detail' course.pk %}" class="btn btn-sm btn-outline-primary">Manage</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-book fs-1 d-block mb-3 opacity-25 text-primary"></i>
+                <p class="mb-2">No courses yet.</p>
+                <a href="{% url 'course_create' %}" class="btn btn-primary btn-sm">Create First Course</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sidebar-card">
+            <div class="p-3 border-bottom fw-semibold small"><i class="bi bi-lightning me-2 text-warning"></i>Quick Actions</div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'course_create' %}" class="list-group-item list-group-item-action small"><i class="bi bi-plus-circle me-2 text-primary"></i>Create New Course</a>
+                <a href="{% url 'course_list' %}" class="list-group-item list-group-item-action small"><i class="bi bi-grid me-2 text-success"></i>View All Courses</a>
+                <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action small"><i class="bi bi-key me-2 text-danger"></i>Change Password</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Assignments - AIT LMS{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-4"><i class="bi bi-pencil-square me-2"></i>My Assignments</h3>
+{% if assignments %}
+<div class="card">
+    <ul class="list-group list-group-flush">
+        {% for a in assignments %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1 fw-semibold">{{ a.title }}</h6>
+                <small class="text-muted">
+                    <i class="bi bi-book me-1"></i>{{ a.course.title }}
+                    &nbsp;|&nbsp;
+                    <i class="bi bi-clock me-1"></i>Due: {{ a.due_date|date:"M d, Y H:i" }}
+                </small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                {% if a.pk in submitted_ids %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Submitted</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pending</span>
+                {% endif %}
+                <a href="{% url 'assignment_detail' a.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-pencil-square fs-1 d-block mb-3"></i>
+        <p>No assignments yet. Enroll in courses to see assignments here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

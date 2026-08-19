@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}Grade Submission{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7">
+  <div class="card shadow-sm mb-4"><div class="card-header"><strong>Student Submission</strong></div><div class="card-body">
+    <p><strong>Student:</strong> {{ submission.student.get_full_name|default:submission.student.username }}</p>
+    <p><strong>Assignment:</strong> {{ submission.assignment.title }}</p>
+    {% if submission.text %}<p><strong>Answer:</strong><br>{{ submission.text }}</p>{% endif %}
+    {% if submission.file %}<p><strong>File:</strong> <a href="{{ submission.file.url }}">Download</a></p>{% endif %}
+  </div></div>
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h5 class="mb-3">Give Score & Feedback</h5>
+    <form method="post">{% csrf_token %}
+      <div class="row mb-3">
+        <div class="col"><label class="form-label">Score</label>{{ form.score }}<small class="text-muted">e.g. 34</small></div>
+        <div class="col"><label class="form-label">Out of</label>{{ form.max_score }}<small class="text-muted">e.g. 50</small></div>
+      </div>
+      <div class="mb-3"><label class="form-label">Feedback</label>{{ form.feedback }}</div>
+      <button type="submit" class="btn btn-primary">Save Grade</button>
+      <a href="{% url 'submission_list' submission.assignment.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

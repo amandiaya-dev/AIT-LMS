@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Courses - AIT LMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0"><i class="bi bi-book me-2"></i>Courses</h3>
+    {% if user.is_instructor %}
+    <a href="{% url 'course_create' %}" class="btn btn-primary"><i class="bi bi-plus me-1"></i>Create Course</a>
+    {% endif %}
+</div>
+{% if courses %}
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for course in courses %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-person me-1"></i>{{ course.instructor.get_full_name|default:course.instructor.username }}
+                </p>
+                <p class="card-text text-muted">{{ course.description|truncatechars:100 }}</p>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <a href="{% url 'course_detail' course.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye me-1"></i>View
+                </a>
+                <div class="d-flex gap-2 align-items-center">
+                    {% if user.is_student %}
+                        {% if course.pk in enrolled_ids %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Enrolled</span>
+                        {% else %}
+                            <a href="{% url 'enroll' course.pk %}" class="btn btn-sm btn-success">
+                                <i class="bi bi-plus-circle me-1"></i>Enroll
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    {% if user.is_instructor and course.instructor == user %}
+                        <a href="{% url 'course_delete' course.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-book fs-1 d-block mb-3"></i>
+        {% if user.is_instructor %}
+            <p class="mb-3">You haven't created any courses yet.</p>
+            <a href="{% url 'course_create' %}" class="btn btn-primary">Create Your First Course</a>
+        {% else %}
+            <p>No courses available yet. Check back soon.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

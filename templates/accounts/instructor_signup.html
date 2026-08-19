@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Instructor Sign Up - AIT LMS{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-workspace me-2"></i>Instructor Registration
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small">First Name</label>
+                            {{ form.first_name }}{{ form.first_name.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small">Last Name</label>
+                            {{ form.last_name }}{{ form.last_name.errors }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Username</label>
+                        {{ form.username }}{{ form.username.errors }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Department</label>
+                        {{ form.department }}{{ form.department.errors }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Password</label>
+                        {{ form.password1 }}{{ form.password1.errors }}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Confirm Password</label>
+                        {{ form.password2 }}{{ form.password2.errors }}
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="bi bi-person-plus me-2"></i>Create Instructor Account
+                    </button>
+                </form>
+                <p class="text-center mt-3 text-muted small">
+                    Already registered? <a href="{% url 'login' %}">Log in here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

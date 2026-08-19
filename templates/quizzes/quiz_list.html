@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Quizzes - AIT LMS{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-4"><i class="bi bi-patch-question me-2"></i>My Quizzes</h3>
+{% if quizzes %}
+<div class="card">
+    <ul class="list-group list-group-flush">
+        {% for quiz in quizzes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1 fw-semibold">{{ quiz.title }}</h6>
+                <small class="text-muted">
+                    <i class="bi bi-book me-1"></i>{{ quiz.course.title }}
+                    &nbsp;|&nbsp;
+                    <i class="bi bi-clock me-1"></i>{{ quiz.time_limit_minutes }} mins
+                    &nbsp;|&nbsp;
+                    <i class="bi bi-question-circle me-1"></i>{{ quiz.total_marks }} questions
+                </small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                {% if quiz.pk in attempted_ids %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Not taken</span>
+                {% endif %}
+                <a href="{% url 'quiz_take' quiz.pk %}" class="btn btn-sm btn-outline-primary">
+                    {% if quiz.pk in attempted_ids %}View Result{% else %}Take Quiz{% endif %}
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-patch-question fs-1 d-block mb-3"></i>
+        <p>No quizzes yet. Enroll in courses to see quizzes here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
