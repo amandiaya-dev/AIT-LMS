@@ -8,7 +8,30 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root { --blue:#0056D2; --dark:#1F1F3A; }
-        body { background:#F8F9FA; font-family:'Segoe UI',sans-serif; color:#1F1F3A; }
+        
+        /* =========================================
+           GLOBAL MOBILE FIXES (Prevents word overflow)
+           ========================================= */
+        body { 
+            background:#F8F9FA; 
+            font-family:'Segoe UI',sans-serif; 
+            color:#1F1F3A; 
+            overflow-x: hidden; /* Prevents horizontal scrolling on the whole page */
+        }
+
+        /* Force long words (like URLs or long titles) to wrap instead of breaking layout */
+        h1, h2, h3, h4, h5, h6, p, span, a, .btn, .card-text, .card-title, .list-group-item {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Ensure images never break their containers */
+        img { max-width: 100%; height: auto; }
+
+        /* =========================================
+           YOUR CUSTOM STYLES
+           ========================================= */
         .navbar { background:var(--dark) !important; box-shadow:0 2px 12px rgba(0,0,0,0.3); padding:0.8rem 0; }
         .navbar-brand { font-size:1.4rem; font-weight:800; color:#fff !important; }
         .navbar-brand span { color:#F9C94E; }
@@ -30,6 +53,51 @@
         .list-group-item { border-color:#f0f0f0; padding:0.9rem 1.25rem; }
         .sidebar-card { background:#fff; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.07); overflow:hidden; }
         footer { background:var(--dark); color:rgba(255,255,255,0.5); padding:1.5rem 0; margin-top:4rem; font-size:0.85rem; }
+
+        /* Tables scroll horizontally on mobile */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* =========================================
+           MOBILE RESPONSIVENESS (@media queries)
+           ========================================= */
+        /* Targets screens smaller than 992px (when the hamburger menu appears) */
+        @media (max-width: 991.98px) {
+            /* Shrink hero banner so it doesn't take up the whole phone screen */
+            .hero { padding: 1.5rem; margin-bottom: 1.5rem; }
+            .hero h2 { font-size: 1.4rem; }
+            
+            /* Shrink dashboard stat numbers */
+            .stat-number { font-size: 1.8rem; }
+            .stat-card { padding: 1rem; }
+
+            /* Style the right-side navbar items when the menu is open on mobile */
+            .mobile-actions {
+                width: 100%;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid rgba(255,255,255,0.15);
+                justify-content: center !important;
+            }
+            
+            /* Make buttons stretch nicely on mobile */
+            .mobile-actions .btn {
+                flex: 1 1 auto; 
+                text-align: center;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Extra small phones (under 576px) */
+        @media (max-width: 575.98px) {
+            .container { padding-left: 15px; padding-right: 15px; }
+            h1, .display-4 { font-size: 1.6rem; }
+            h2 { font-size: 1.3rem; }
+            .table { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
@@ -37,8 +105,8 @@
     <div class="container">
         <a class="navbar-brand" href="{% url 'dashboard' %}">AIT <span>LMS</span></a>
         {% if user.is_authenticated %}
-        <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <i class="bi bi-list text-white fs-4"></i>
+        <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white fs-3"></i>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
             <div class="navbar-nav me-auto gap-1">
@@ -50,20 +118,26 @@
                 <a class="nav-link" href="{% url 'my_attendance' %}"><i class="bi bi-calendar-check me-1"></i>Attendance</a>
                 {% endif %}
             </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+            
+            <!-- Added 'mobile-actions' class here to target it in the CSS above -->
+            <div class="d-flex align-items-center gap-2 flex-wrap mobile-actions">
                 {% if user.is_student and user.semester %}
-                <span class="semester-badge"><i class="bi bi-mortarboard me-1"></i>{{ user.get_semester_display_name }}</span>
+                <span class="semester-badge mb-1"><i class="bi bi-mortarboard me-1"></i>{{ user.get_semester_display_name }}</span>
                 {% endif %}
+                
                 {% if user.is_staff or user.is_admin_role %}
                 <a href="{% url 'import_students' %}" class="btn btn-sm btn-warning fw-bold">
-                    <i class="bi bi-upload me-1"></i>Import Students
+                    <i class="bi bi-upload me-1"></i>Import
                 </a>
                 {% endif %}
+                
                 <span class="text-white-50 small d-none d-lg-inline">{{ user.get_full_name|default:user.username }}</span>
+                
                 <a href="{% url 'change_password' %}" class="btn btn-sm btn-outline-light">
                     <i class="bi bi-key me-1"></i>Password
                 </a>
-                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                
+                <form method="post" action="{% url 'logout' %}" class="mb-0 d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-light">
                         <i class="bi bi-box-arrow-right me-1"></i>Log out
@@ -84,6 +158,7 @@
         </div>
         {% endfor %}
     {% endif %}
+    
     {% block content %}{% endblock %}
 </div>
 
