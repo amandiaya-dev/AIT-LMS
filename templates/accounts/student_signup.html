@@ -2,7 +2,7 @@
 {% block title %}Student Sign Up - AIT LMS{% endblock %}
 {% block content %}
 <div class="row justify-content-center mt-4">
-    <div class="col-md-5">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-person-badge me-2 text-primary"></i>Student Registration
@@ -10,9 +10,8 @@
             <div class="card-body p-4">
                 <div class="alert alert-info small mb-4">
                     <i class="bi bi-info-circle me-2"></i>
-                    Enter your <strong>Student ID</strong> exactly as it appears on your student card or letter of admission.
-                    Your name, semester, and department will be filled in automatically from the AIT registry.
-                    Your default password will be <strong>AIT@2026</strong>.
+                    Enter your student index number and details to create your account.
+                  You will be asked to change it after signing up.
                 </div>
 
                 <form method="post">
@@ -24,17 +23,42 @@
                                 <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}<br>
                             {% endfor %}
                         {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}<br>
+                        {% endfor %}
                     </div>
                     {% endif %}
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Student ID Number</label>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Student Index Number</label>
                         {{ form.student_id }}
-                        <small class="text-muted">e.g. AIT/2024/001</small>
+                        <small class="text-muted">This becomes your login username — e.g. ADS21B00022Y</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Current Semester</label>
+                        {{ form.semester }}
+                        <small class="text-muted">Courses for your semester will be recommended automatically</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Department</label>
+                        {{ form.department }}
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="bi bi-person-check me-2"></i>Verify & Create Account
+                        <i class="bi bi-person-check me-2"></i>Create My Account
                     </button>
                 </form>
 

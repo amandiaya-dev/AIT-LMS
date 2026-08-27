@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import User, StudentRecord
+from .models import User
 
 DEFAULT_STUDENT_PASSWORD = "AIT@2026"
 DEFAULT_INSTRUCTOR_PASSWORD = "AITSTAFF@2026"
@@ -8,55 +8,45 @@ DEFAULT_INSTRUCTOR_PASSWORD = "AITSTAFF@2026"
 
 class StudentSignUpForm(forms.ModelForm):
     """
-    Students sign up using their Student ID.
-    The ID is verified against the StudentRecord registry before the
-    account is created. If not found or inactive, signup is blocked.
-    Name, semester and department are auto-filled from the registry.
+    Any student can sign up using their index/student ID number.
+    No pre-loaded registry needed — just enter your ID and details.
     """
-    student_id = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={
-            "class": "form-control form-control-lg",
-            "placeholder": "e.g. AIT/2024/001"
-        })
-    )
+    first_name = forms.CharField(max_length=150, required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "First Name"}))
+    last_name = forms.CharField(max_length=150, required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Last Name"}))
+    student_id = forms.CharField(max_length=50, required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "ADS21B00022Y"}))
+    semester = forms.ChoiceField(
+        choices=[(i, f"Semester {i}") for i in range(1, 9)],
+        widget=forms.Select(attrs={"class": "form-select"}))
+    department = forms.CharField(max_length=100, required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Computer Science"}))
 
     class Meta:
         model = User
-        fields = ["student_id"]
+        fields = ["first_name", "last_name", "student_id", "semester", "department"]
 
     def clean_student_id(self):
         sid = self.cleaned_data["student_id"].strip()
-
-        # Check registry
-        try:
-            record = StudentRecord.objects.get(student_id=sid, is_active=True)
-        except StudentRecord.DoesNotExist:
-            raise forms.ValidationError(
-                "This Student ID was not found in the AIT registry. "
-                "Please check your ID or contact the administration."
-            )
-
-        # Check not already registered
         if User.objects.filter(student_id=sid).exists():
             raise forms.ValidationError(
-                "An account already exists for this Student ID. "
-                "Please log in instead."
+                "An account already exists for this Student ID. Please log in instead."
             )
-
-        # Attach record to use in save()
-        self._registry_record = record
+        if User.objects.filter(username=sid).exists():
+            raise forms.ValidationError(
+                "This Student ID is already taken. Please log in instead."
+            )
         return sid
 
     def save(self, commit=True):
-        record = self._registry_record
         user = User(
-            username=record.student_id,
-            student_id=record.student_id,
-            first_name=record.first_name,
-            last_name=record.last_name,
-            department=record.department,
-            semester=record.semester,
+            username=self.cleaned_data["student_id"],
+            student_id=self.cleaned_data["student_id"],
+            first_name=self.cleaned_data["first_name"],
+            last_name=self.cleaned_data["last_name"],
+            department=self.cleaned_data.get("department", ""),
+            semester=self.cleaned_data["semester"],
             role=User.Role.STUDENT,
         )
         user.set_password(DEFAULT_STUDENT_PASSWORD)
@@ -99,7 +89,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 
 
 class CSVImportForm(forms.Form):
-    """Admin uploads a CSV file of student records."""
     csv_file = forms.FileField(
         label="Student Registry CSV File",
         widget=forms.FileInput(attrs={"class": "form-control", "accept": ".csv"})
